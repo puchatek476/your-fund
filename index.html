@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#101612">
+    <meta name="description" content="Prosty podgląd Twoich portfeli i aktywów.">
+    <title>Mój majątek</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.png" type="image/png">
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <section class="auth-shell" id="auth-screen" aria-labelledby="auth-title">
+      <div class="auth-card">
+        <a class="brand auth-brand" href="./" aria-label="Mój majątek — strona główna">
+          <img class="brand-icon" src="icon.png" alt="">
+          <span>Mój majątek</span>
+        </a>
+        <p class="eyebrow">Prywatny dostęp do Twoich danych</p>
+        <h1 id="auth-title">Zaloguj się</h1>
+        <p class="auth-copy">Zaloguj się na jedyne konto aplikacji, aby synchronizować portfele między urządzeniami.</p>
+        <form id="auth-form">
+          <label for="auth-email">Adres e-mail</label>
+          <input id="auth-email" name="email" type="email" autocomplete="email" required>
+          <label for="auth-password">Hasło</label>
+          <input id="auth-password" name="password" type="password" minlength="6" autocomplete="current-password" required>
+          <button class="button button-primary auth-submit" type="submit">Zaloguj się</button>
+        </form>
+        <p class="auth-message" id="auth-message" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <main class="app-shell" id="app-screen" hidden>
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="Mój majątek — strona główna">
+          <img class="brand-icon" src="icon.png" alt="">
+          <span>Mój majątek</span>
+        </a>
+        <div class="topbar-actions">
+          <button class="button button-quiet" id="export-button" type="button">Eksportuj dane</button>
+          <button class="button button-quiet" id="signout-button" type="button">Wyloguj</button>
+        </div>
+      </header>
+
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Twoje finanse, w jednym miejscu</p>
+          <h1 id="page-title">Spokojnie. Wiesz, co masz.</h1>
+          <p class="intro-copy">Portfele według Twoich celów, aktywa pod ręką.</p>
+        </div>
+        <div class="total-card">
+          <span class="muted-label">Łączna wartość aktywów</span>
+          <strong id="grand-total">0,00 zł</strong>
+          <span class="return-summary" id="grand-performance"></span>
+          <span class="total-footnote">Wynik dla aktywów z ceną zakupu i aktualną wyceną · PLN</span>
+        </div>
+      </section>
+
+      <section class="portfolio-section" aria-labelledby="portfolios-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Podział według celu</p>
+            <h2 id="portfolios-heading">Twoje portfele</h2>
+          </div>
+        </div>
+        <div class="portfolio-list" id="portfolio-list"></div>
+      </section>
+
+      <section class="assets-section" aria-labelledby="selected-portfolio-name">
+        <div class="assets-heading">
+          <div>
+            <p class="eyebrow" id="selected-portfolio-caption">Wybrany portfel</p>
+            <h2 id="selected-portfolio-name"></h2>
+          </div>
+          <div class="assets-heading-actions">
+            <button class="button button-secondary" id="manage-locations-button" type="button">Zarządzaj lokalizacjami</button>
+            <button class="button button-primary" id="add-asset-button" type="button">
+              <span aria-hidden="true">＋</span> Dodaj aktywo
+            </button>
+          </div>
+        </div>
+        <div class="assets-summary" id="assets-summary"></div>
+        <section class="asset-allocation" id="asset-allocation" aria-labelledby="allocation-heading" hidden>
+          <div class="allocation-heading">
+            <h3 id="allocation-heading">Struktura aktywów</h3>
+            <span class="allocation-total" id="allocation-total"></span>
+          </div>
+          <div class="allocation-bar" id="allocation-bar" role="img"></div>
+          <div class="allocation-legend" id="allocation-legend"></div>
+        </section>
+        <div class="asset-list" id="asset-list"></div>
+        <p class="price-note" id="price-note">Wszystkie ceny podawaj w PLN — także dla aktywów notowanych w innych walutach.</p>
+      </section>
+
+      <footer class="app-footer">
+        <span>Dane są synchronizowane z Twoim kontem Supabase.</span>
+        <span id="save-status" role="status" aria-live="polite"></span>
+      </footer>
+    </main>
+
+    <dialog class="form-dialog" id="asset-dialog">
+      <form id="asset-form">
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow" id="asset-dialog-caption">Aktywo w portfelu</p>
+            <h2 id="asset-dialog-title">Dodaj aktywo</h2>
+          </div>
+          <button class="icon-button" type="button" data-close-dialog aria-label="Zamknij">×</button>
+        </div>
+        <label for="asset-code">Aktywo</label>
+        <select id="asset-code" name="assetCode" required></select>
+        <label for="asset-location">Lokalizacja</label>
+        <select id="asset-location" name="locationId" required></select>
+        <div class="form-row">
+          <div>
+            <label for="asset-quantity" id="asset-quantity-label">Ilość</label>
+            <input id="asset-quantity" name="quantity" type="number" min="0.00000001" step="any" inputmode="decimal" required>
+          </div>
+          <div>
+            <label for="asset-purchase-price" id="asset-purchase-price-label">Cena zakupu za jednostkę (opcjonalnie)</label>
+            <input id="asset-purchase-price" name="purchasePrice" type="number" min="0" step="any" inputmode="decimal">
+          </div>
+        </div>
+        <div id="bond-fields" hidden>
+          <label for="bond-issue-code">Kod emisji obligacji</label>
+          <input id="bond-issue-code" name="bondIssueCode" type="text" maxlength="7" placeholder="np. EDO1035" pattern="(OTS|ROR|DOR|TOS|COI|EDO|ROS|ROD)[0-9]{4}" autocomplete="off">
+          <label for="asset-purchase-date">Data zakupu</label>
+          <input id="asset-purchase-date" name="purchaseDate" type="date">
+        </div>
+        <div class="dialog-actions">
+          <button class="button button-secondary" type="button" data-close-dialog>Anuluj</button>
+          <button class="button button-primary" id="save-asset-button" type="submit">Dodaj aktywo</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="form-dialog" id="location-dialog">
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">Miejsce przechowywania</p>
+          <h2>Zarządzaj lokalizacjami</h2>
+        </div>
+        <button class="icon-button" type="button" data-close-dialog aria-label="Zamknij">×</button>
+      </div>
+      <form id="location-add-form">
+        <label for="new-location-name">Dodaj lokalizację</label>
+        <div class="location-add-row">
+          <input id="new-location-name" name="name" type="text" maxlength="80" autocomplete="off" required>
+          <button class="button button-primary" id="add-location-submit" type="submit">Dodaj</button>
+        </div>
+      </form>
+      <p class="price-dialog-note">Zmiana nazwy zaktualizuje ją przy wszystkich przypisanych aktywach.</p>
+      <div class="location-list" id="location-list"></div>
+      <div class="dialog-actions">
+        <button class="button button-secondary" type="button" data-close-dialog>Gotowe</button>
+      </div>
+    </dialog>
+
+    <dialog class="form-dialog" id="price-dialog">
+      <form id="price-form">
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow" id="price-dialog-caption">Aktualna wycena</p>
+            <h2 id="price-dialog-title">Dodaj aktualną cenę</h2>
+          </div>
+          <button class="icon-button" type="button" data-close-dialog aria-label="Zamknij">×</button>
+        </div>
+        <label for="price-type">Co chcesz wycenić?</label>
+        <select id="price-type" name="priceType" required>
+          <option value="unit">Cena za jednostkę</option>
+          <option value="total">Łączna wartość całej pozycji</option>
+        </select>
+        <label for="price-amount" id="price-amount-label">Cena</label>
+        <input id="price-amount" name="amount" type="number" min="0.00000001" step="any" inputmode="decimal" required>
+        <div id="price-date-field" hidden>
+          <label for="price-recorded-on">Data wpisu</label>
+          <input id="price-recorded-on" name="recordedOn" type="date">
+        </div>
+        <p class="price-dialog-note" id="price-dialog-note">Wpisz kwotę w PLN. Zostanie zapisana w historii z dzisiejszą datą.</p>
+        <div class="dialog-actions">
+          <button class="button button-secondary" type="button" data-close-dialog>Anuluj</button>
+          <button class="button button-primary" id="save-price-button" type="submit">Zapisz cenę</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="app.js" defer></script>
+  </body>
+</html>

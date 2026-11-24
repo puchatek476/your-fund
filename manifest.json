@@ -1,0 +1,18 @@
+{
+  "name": "Mój majątek",
+  "short_name": "Mój majątek",
+  "description": "Prosty podgląd portfeli i aktywów.",
+  "lang": "pl",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#101612",
+  "theme_color": "#101612",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
